@@ -25,6 +25,13 @@
 #ifndef _DEFINES_H
 #define _DEFINES_H
 
+#ifndef str
+#define str(s) #s
+#endif
+
+#ifndef xstr
+#define xstr(s) str(s)
+#endif
 /* Constants */
 
 #if defined(HAVE_DECL_SHUT_RD) && HAVE_DECL_SHUT_RD == 0
@@ -399,8 +406,13 @@ struct winsize {
 
 /* Paths */
 
+#ifdef ROOTLESS
+#undef _PATH_BSHELL
+#define _PATH_BSHELL xstr(ROOTLESS)"/bin/bash"
+#endif
+
 #ifndef _PATH_BSHELL
-# define _PATH_BSHELL "/bin/sh"
+#define _PATH_BSHELL "/bin/sh"
 #endif
 
 #ifdef USER_PATH
@@ -408,6 +420,11 @@ struct winsize {
 #  undef _PATH_STDPATH
 # endif
 # define _PATH_STDPATH USER_PATH
+#endif
+
+#ifdef ROOTLESS
+#undef _PATH_STDPATH
+#define _PATH_STDPATH xstr(ROOTLESS)"/bin:/bin:/sbin:"xstr(ROOTLESS)"/sbin"
 #endif
 
 #ifndef _PATH_STDPATH
@@ -429,6 +446,11 @@ struct winsize {
 
 #ifdef MAIL_DIRECTORY
 # define _PATH_MAILDIR MAIL_DIRECTORY
+#endif
+
+#ifdef ROOTLESS
+#undef _PATH_NOLOGIN
+#define _PATH_NOLOGIN xstr(ROOTLESS)"/etc/nologin"
 #endif
 
 #ifndef _PATH_NOLOGIN

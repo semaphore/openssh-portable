@@ -829,11 +829,16 @@ do_motd(void)
 	char buf[256];
 
 	if (options.print_motd) {
-#ifdef HAVE_LOGIN_CAP
-		f = fopen(login_getcapstr(lc, "welcome", "/etc/motd",
-		    "/etc/motd"), "r");
+#ifdef ROOTLESS
+		const char *motdFile = xstr(ROOTLESS)"/etc/motd";
 #else
-		f = fopen("/etc/motd", "r");
+		const char *motdFile = "/etc/motd";
+#endif
+#ifdef HAVE_LOGIN_CAP
+		f = fopen(login_getcapstr(lc, "welcome", motdFile,
+		    motdFile), "r");
+#else
+		f = fopen(motdFile, "r");
 #endif
 		if (f) {
 			while (fgets(buf, sizeof(buf), f))

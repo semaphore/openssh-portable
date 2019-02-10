@@ -268,8 +268,8 @@ string_from_portable(int pflags)
 
 /* handle handles */
 
-typedef struct Handle Handle;
-struct Handle {
+typedef struct _Handle _Handle;
+struct _Handle {
 	int use;
 	DIR *dirp;
 	int fd;
@@ -285,7 +285,7 @@ enum {
 	HANDLE_FILE
 };
 
-Handle *handles = NULL;
+_Handle *handles = NULL;
 u_int num_handles = 0;
 int first_unused_handle = -1;
 
@@ -305,7 +305,7 @@ handle_new(int use, const char *name, int fd, int flags, DIR *dirp)
 		if (num_handles + 1 <= num_handles)
 			return -1;
 		num_handles++;
-		handles = xreallocarray(handles, num_handles, sizeof(Handle));
+		handles = xreallocarray(handles, num_handles, sizeof(_Handle));
 		handle_unused(num_handles - 1);
 	}
 

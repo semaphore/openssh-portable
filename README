@@ -1,3 +1,32 @@
+WARNING
+***********************************************************************************
+
+This fork is only for bringing openssh to ios 12.1.2 for the rootlessJB3 project.
+
+Don't use this anywhere else.
+
+You'll need openssl 1.0.2q. I've included a tarball that you can place next to this project directory
+
+Ex:
+|
+|--openssh
+| |--openssl-1.0.2q.tar
+|--openssl
+
+If you set up your directories like this you can avoid many of the build issues some face when trying to build openssh on a mac.
+
+Build:
+autoconf && autoheader
+./configure --prefix=/var --with-cppflags=-DROOTLESS=/var --with-sandbox=no --with-default-path="/var/bin:/var/sbin:/bin" --with-ssl-dir=../openssl --with-pie --with-privsep-user=mobile --host=armv64-apple-darwin CC="xcrun -sdk iphoneos clang -mios-version-min=12.1 -arch arm64"
+make ldid
+
+The result is an sshbin.tar with all binaries signed with (included) ldid2 and (included) entitlements file (ent.xml)
+
+This was a quick and dirty hack. I tried fixing passwd logins on a jailed environment but it didn't work and I don't have time to fix it.
+
+***********************************************************************************
+
+
 See https://www.openssh.com/releasenotes.html#7.9p1 for the release notes.
 
 Please read https://www.openssh.com/report.html for bug reporting

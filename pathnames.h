@@ -12,7 +12,18 @@
  * called by a name other than "ssh" or "Secure Shell".
  */
 
-#define ETCDIR				"/etc"
+#ifdef ROOTLESS
+#define R xstr(ROOTLESS)
+#else
+#define R ""
+#endif
+
+#define ETCDIR				R "/etc"
+
+
+#ifdef ROOTLESS
+#undef SSHDIR
+#endif
 
 #ifndef SSHDIR
 #define SSHDIR				ETCDIR "/ssh"
@@ -43,8 +54,12 @@
 #define _PATH_HOST_RSA_KEY_FILE		SSHDIR "/ssh_host_rsa_key"
 #define _PATH_DH_MODULI			SSHDIR "/moduli"
 
+#ifdef ROOTLESS
+#undef _PATH_SSH_PROGRAM
+#endif
+
 #ifndef _PATH_SSH_PROGRAM
-#define _PATH_SSH_PROGRAM		"/usr/bin/ssh"
+#define _PATH_SSH_PROGRAM		R "/usr/bin/ssh"
 #endif
 
 /*
@@ -113,7 +128,7 @@
  * ~/.rhosts and /etc/hosts.equiv if rhosts authentication is enabled.
  */
 #define _PATH_SSH_HOSTS_EQUIV		SSHDIR "/shosts.equiv"
-#define _PATH_RHOSTS_EQUIV		"/etc/hosts.equiv"
+#define _PATH_RHOSTS_EQUIV		R "/etc/hosts.equiv"
 
 /*
  * Default location of askpass
@@ -123,13 +138,21 @@
 #endif
 
 /* Location of ssh-keysign for hostbased authentication */
+#ifdef ROOTLESS
+#undef _PATH_SSH_KEY_SIGN
+#endif
+
 #ifndef _PATH_SSH_KEY_SIGN
-#define _PATH_SSH_KEY_SIGN		"/usr/libexec/ssh-keysign"
+#define _PATH_SSH_KEY_SIGN		R "/usr/libexec/ssh-keysign"
 #endif
 
 /* Location of ssh-pkcs11-helper to support keys in tokens */
+#ifdef ROOTLESS
+#undef _PATH_SSH_PKCS11_HELPER
+#endif
+
 #ifndef _PATH_SSH_PKCS11_HELPER
-#define _PATH_SSH_PKCS11_HELPER		"/usr/libexec/ssh-pkcs11-helper"
+#define _PATH_SSH_PKCS11_HELPER		R "/usr/libexec/ssh-pkcs11-helper"
 #endif
 
 /* xauth for X11 forwarding */
@@ -148,8 +171,12 @@
 #endif
 
 /* for sftp */
+#ifdef ROOTLESS
+#undef _PATH_SFTP_SERVER
+#endif
+
 #ifndef _PATH_SFTP_SERVER
-#define _PATH_SFTP_SERVER		"/usr/libexec/sftp-server"
+#define _PATH_SFTP_SERVER		R "/usr/libexec/sftp-server"
 #endif
 
 /* chroot directory for unprivileged user when UsePrivilegeSeparation=yes */
@@ -158,15 +185,23 @@
 #endif
 
 /* for passwd change */
+#ifdef ROOTLESS
+#undef _PATH_PASSWD_PROG
+#endif
+
 #ifndef _PATH_PASSWD_PROG
-#define _PATH_PASSWD_PROG             "/usr/bin/passwd"
+#define _PATH_PASSWD_PROG            R "/usr/bin/passwd"
 #endif
 
 #ifndef _PATH_LS
 #define _PATH_LS			"ls"
 #endif
 
+#ifdef ROOTLESS
+#undef ASKPASS_PROGRAM
+#endif
+
 /* Askpass program define */
 #ifndef ASKPASS_PROGRAM
-#define ASKPASS_PROGRAM         "/usr/lib/ssh/ssh-askpass"
+#define ASKPASS_PROGRAM        R "/usr/lib/ssh/ssh-askpass"
 #endif /* ASKPASS_PROGRAM */

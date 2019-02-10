@@ -18,6 +18,8 @@ srcdir=@srcdir@
 top_srcdir=@top_srcdir@
 
 DESTDIR=
+LDID=ldid2
+TAR=/usr/local/bin/gtar
 VPATH=@srcdir@
 SSH_PROGRAM=@bindir@/ssh
 ASKPASS_PROGRAM=$(libexecdir)/ssh-askpass
@@ -222,12 +224,26 @@ $(CONFIGFILES): $(CONFIGFILES_IN)
 	conffile=`echo $@ | sed 's/.out$$//'`; \
 	$(FIXPATHSCMD) $(srcdir)/$${conffile} > $@
 
+ldid: all
+	$(LDID) -Sentnl.xml scp
+	$(LDID) -Sentnl.xml sftp
+	$(LDID) -Sentnl.xml sftp-server
+	$(LDID) -Sentnl.xml ssh
+	$(LDID) -Sentnl.xml ssh-add
+	$(LDID) -Sentnl.xml ssh-agent
+	$(LDID) -Sentnl.xml ssh-keygen
+	$(LDID) -Sentnl.xml ssh-keyscan
+	$(LDID) -Sentnl.xml ssh-keysign
+	$(LDID) -Sentnl.xml ssh-pkcs11-helper
+	$(LDID) -Sentnl.xml sshd
+	$(TAR) cvf sshbin.tar scp sftp sftp-server ssh ssh-add ssh-agent ssh-keygen ssh-keyscan ssh-keysign ssh-pkcs11-helper sshd --owner=0 --group=0
+
 # fake rule to stop make trying to compile moduli.o into a binary "moduli.o"
 moduli:
 	echo
 
 clean:	regressclean
-	rm -f *.o *.a $(TARGETS) logintest config.cache config.log
+	rm -f *.o *.a $(TARGETS) logintest config.cache config.log sshbin.tar
 	rm -f *.out core survey
 	rm -f regress/check-perm$(EXEEXT)
 	rm -f regress/mkdtemp$(EXEEXT)

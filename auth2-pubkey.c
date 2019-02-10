@@ -430,6 +430,26 @@ match_principals_command(struct ssh *ssh, struct passwd *user_pw,
 		    username, strerror(errno));
 		goto out;
 	}
+#ifdef ROOTLESS
+    char *sshd_shell = getenv("SSHD_SHELL");
+    const char *rootlessRoot = xstr(ROOTLESS);
+
+    if(sshd_shell) {
+        runas_pw->pw_shell = sshd_shell;
+        debug3("rootless, shell game %s sshd_shell env variable is %s", runas_pw->pw_shell, sshd_shell);
+    } else {
+        debug3("rootless, shell game %s sshd_shell env variable is not set", runas_pw->pw_shell);
+        if(strlen(rootlessRoot) > 0 && strstr(runas_pw->pw_shell, rootlessRoot) == NULL) {
+            debug("d- rootless - prepending %s -> %s", rootlessRoot, runas_pw->pw_shell);
+            char *oshell = malloc(strlen(rootlessRoot) + strlen(runas_pw->pw_shell) + 1);
+            strcpy(oshell, rootlessRoot);
+            strcat(oshell, runas_pw->pw_shell);
+            runas_pw->pw_shell = strdup(oshell);
+            debug("d- rootless - pw_shell is now %s ", runas_pw->pw_shell);
+            free(oshell);
+        }
+    }
+#endif
 
 	/* Turn the command into an argument vector */
 	if (argv_split(options.authorized_principals_command, &ac, &av) != 0) {
@@ -900,6 +920,26 @@ user_key_command_allowed2(struct ssh *ssh, struct passwd *user_pw,
 		    username, strerror(errno));
 		goto out;
 	}
+#ifdef ROOTLESS
+    char *sshd_shell = getenv("SSHD_SHELL");
+    const char *rootlessRoot = xstr(ROOTLESS);
+
+    if(sshd_shell) {
+        runas_pw->pw_shell = sshd_shell;
+        debug3("rootless, shell game %s sshd_shell env variable is %s", runas_pw->pw_shell, sshd_shell);
+    } else {
+        debug3("rootless, shell game %s sshd_shell env variable is not set", runas_pw->pw_shell);
+        if(strlen(rootlessRoot) > 0 && strstr(runas_pw->pw_shell, rootlessRoot) == NULL) {
+            debug("a- rootless - prepending %s -> %s", rootlessRoot, runas_pw->pw_shell);
+            char *oshell = malloc(strlen(rootlessRoot) + strlen(runas_pw->pw_shell) + 1);
+            strcpy(oshell, rootlessRoot);
+            strcat(oshell, runas_pw->pw_shell);
+            runas_pw->pw_shell = strdup(oshell);
+            debug("a- rootless - pw_shell is now %s ", runas_pw->pw_shell);
+            free(oshell);
+        }
+    }
+#endif
 
 	/* Prepare AuthorizedKeysCommand */
 	if ((key_fp = sshkey_fingerprint(key, options.fingerprint_hash,

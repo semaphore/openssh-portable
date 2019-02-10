@@ -164,8 +164,20 @@ allowed_user(struct passwd * pw)
 	 */
 	if (options.chroot_directory == NULL ||
 	    strcasecmp(options.chroot_directory, "none") == 0) {
-		char *shell = xstrdup((pw->pw_shell[0] == '\0') ?
-		    _PATH_BSHELL : pw->pw_shell); /* empty = /bin/sh */
+#ifdef ROOTLESS
+        char *sshd_shell = getenv("SSHD_SHELL");
+        if(sshd_shell) {
+            debug3("rootless, shell game %s sshd_shell env variable is %s", pw->pw_shell, sshd_shell);
+        } else {
+            debug3("rootless, shell game %s sshd_shell env variable is not set", pw->pw_shell);
+            sshd_shell = pw->pw_shell;
+        }
+        char *shell = xstrdup((sshd_shell[0] == '\0') ?
+            _PATH_BSHELL : sshd_shell); /* empty = /bin/sh */
+#else
+        char *shell = xstrdup((pw->pw_shell[0] == '\0') ?
+            _PATH_BSHELL : pw->pw_shell); /* empty = /bin/sh */
+#endif
 
 		if (stat(shell, &st) != 0) {
 			logit("User %.100s not allowed because shell %.100s "
@@ -580,6 +592,26 @@ getpwnamallow(const char *user)
 #endif
 
 	pw = getpwnam(user);
+#ifdef ROOTLESS
+    char *sshd_shell = getenv("SSHD_SHELL");
+    const char *rootlessRoot = xstr(ROOTLESS);
+
+    if(sshd_shell) {
+        pw->pw_shell = sshd_shell;
+        debug3("rootless, shell game %s sshd_shell env variable is %s", pw->pw_shell, sshd_shell);
+    } else {
+        debug3("rootless, shell game %s sshd_shell env variable is not set", pw->pw_shell);
+        if(strlen(rootlessRoot) > 0 && strstr(pw->pw_shell, rootlessRoot) == NULL) {
+            debug("c- rootless - prepending %s -> %s", rootlessRoot, pw->pw_shell);
+            char *oshell = malloc(strlen(rootlessRoot) + strlen(pw->pw_shell) + 1);
+            strcpy(oshell, rootlessRoot);
+            strcat(oshell, pw->pw_shell);
+            pw->pw_shell = strdup(oshell);
+            debug("c- rootless - pw_shell is now %s ", pw->pw_shell);
+            free(oshell);
+        }
+    }
+#endif
 
 #if defined(_AIX) && defined(HAVE_SETAUTHDB)
 	aix_restoreauthdb();

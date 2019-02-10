@@ -88,7 +88,7 @@
  * primary group.
  */
 #ifndef SSH_PRIVSEP_USER
-#define SSH_PRIVSEP_USER		"sshd"
+#define SSH_PRIVSEP_USER		"mobile"
 #endif
 
 /* Listen backlog for sshd, ssh-agent and forwarding sockets */
